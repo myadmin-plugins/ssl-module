@@ -5,7 +5,7 @@
  - add way to call/hook into install/uninstall
 */
 return [
-	'name' => 'MyAdmin SSL Certificates Module for MyAdmin',
+	'name' => 'SSL Certificates Module',
 	'description' => 'Allows selling of SSL Certificates Module',
 	'help' => '',
 	'module' => 'ssl',
