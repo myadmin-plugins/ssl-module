@@ -6,7 +6,21 @@ use Symfony\Component\EventDispatcher\GenericEvent;
 
 class Plugin {
 
+	public static $name = 'SSL Certificates Module';
+	public static $description = 'Allows selling of SSL Certificates Module';
+	public static $help = '';
+	public static $module = 'ssl';
+	public static $type = 'module';
+
+
 	public function __construct() {
+	}
+
+	public static function Hooks() {
+		return [
+			'ssl.load_processing' => ['Detain\MyAdminSsl\Plugin', 'Load'],
+			'ssl.settings' => ['Detain\MyAdminSsl\Plugin', 'Settings'],
+		];
 	}
 
 	public static function Load(GenericEvent $event) {
