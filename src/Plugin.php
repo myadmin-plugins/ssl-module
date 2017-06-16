@@ -18,8 +18,8 @@ class Plugin {
 
 	public static function Hooks() {
 		return [
-			'ssl.load_processing' => ['Detain\MyAdminSsl\Plugin', 'Load'],
-			'ssl.settings' => ['Detain\MyAdminSsl\Plugin', 'Settings'],
+			'ssl.load_processing' => [__CLASS__, 'Load'],
+			'ssl.settings' => [__CLASS__, 'Settings'],
 		];
 	}
 
