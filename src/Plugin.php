@@ -19,7 +19,7 @@ class Plugin {
 	public static function getHooks() {
 		return [
 			'ssl.load_processing' => [__CLASS__, 'Load'],
-			'ssl.settings' => [__CLASS__, 'Settings'],
+			'ssl.settings' => [__CLASS__, 'getSettings'],
 		];
 	}
 
@@ -27,7 +27,7 @@ class Plugin {
 
 	}
 
-	public static function Settings(GenericEvent $event) {
+	public static function getSettings(GenericEvent $event) {
 		$settings = $event->getSubject();
 		$settings->add_dropdown_setting('ssl', 'General', 'outofstock_ssl', 'Out Of Stock Ssl', 'Enable/Disable Sales Of This Type', $settings->get_setting('OUTOFSTOCK_SSL'), array('0', '1'), array('No', 'Yes', ));
 	}
