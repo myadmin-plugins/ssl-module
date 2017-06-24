@@ -11,6 +11,23 @@ class Plugin {
 	public static $help = '';
 	public static $module = 'ssl';
 	public static $type = 'module';
+	public static $settings = [
+		'SERVICE_ID_OFFSET' => 3000,
+		'USE_REPEAT_INVOICE' => false,
+		'USE_PACKAGES' => true,
+		'BILLING_DAYS_OFFSET' => 0,
+		'IMGNAME' => 'vcard_48.png',
+		'REPEAT_BILLING_METHOD' => PRORATE_BILLING,
+		'DELETE_PENDING_DAYS' => 45,
+		'SUSPEND_DAYS' => 14,
+		'SUSPEND_WARNING_DAYS' => 7,
+		'TITLE' => 'SSL Certificates',
+		'MENUNAME' => 'SSL',
+		'EMAIL_FROM' => 'support@inssl.net',
+		'TBLNAME' => 'SSL',
+		'TABLE' => 'ssl_certs',
+		'TITLE_FIELD' => 'ssl_hostname',
+		'PREFIX' => 'ssl'];
 
 
 	public function __construct() {
