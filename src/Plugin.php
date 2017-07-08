@@ -6,7 +6,7 @@ use Symfony\Component\EventDispatcher\GenericEvent;
 
 class Plugin {
 
-	public static $name = 'SSL Certificates Module';
+	public static $name = 'SSL Certificates';
 	public static $description = 'Allows selling of SSL Certificates Module';
 	public static $help = '';
 	public static $module = 'ssl';
