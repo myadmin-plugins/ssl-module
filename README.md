@@ -24,5 +24,5 @@ composer require detain/myadmin-ssl-module
 
 ## License
 
-The SSL Certificates Module for MyAdmin class is licensed under the LGPL-v2 license.
+The SSL Certificates Module for MyAdmin class is licensed under the LGPL-v2.1 license.
 
