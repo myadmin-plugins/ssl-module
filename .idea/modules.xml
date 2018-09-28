@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/myadmin-ssl-module.iml" filepath="$PROJECT_DIR$/.idea/myadmin-ssl-module.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/ssl-module.iml" filepath="$PROJECT_DIR$/.idea/ssl-module.iml" />
     </modules>
   </component>
 </project>

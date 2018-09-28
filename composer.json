@@ -1,5 +1,5 @@
 {
-	"name": "detain/myadmin-ssl-module",
+	"name": "detain/ssl-module",
 	"type": "myadmin-plugin",
 	"description": "SSL Certificates Module for MyAdmin",
 	"keywords": [
