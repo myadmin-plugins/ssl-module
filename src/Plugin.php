@@ -110,6 +110,6 @@ class Plugin
          * @var \MyAdmin\Settings $settings
          **/
         $settings = $event->getSubject();
-		$settings->add_dropdown_setting(self::$module, __('General'), 'outofstock_ssl', __('Out Of Stock Ssl'), __('Enable/Disable Sales Of This Type'), $settings->get_setting('OUTOFSTOCK_SSL'), ['0', '1'], ['No', 'Yes']);
+		$settings->add_dropdown_setting(self::$module, _('General'), 'outofstock_ssl', _('Out Of Stock Ssl'), _('Enable/Disable Sales Of This Type'), $settings->get_setting('OUTOFSTOCK_SSL'), ['0', '1'], ['No', 'Yes']);
 	}
 }
