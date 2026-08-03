@@ -4,7 +4,13 @@ namespace Detain\MyAdminSsl\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Detain\MyAdminSsl\Plugin;
+use Detain\MyAdminSsl\Tests\Support\DbSpy;
+use Detain\MyAdminSsl\Tests\Support\HistorySpy;
+use Detain\MyAdminSsl\Tests\Support\ServiceHandlerSpy;
+use MyAdmin\App;
+use MyAdmin\Mail;
 use ReflectionClass;
+use Symfony\Component\EventDispatcher\GenericEvent;
 
 /**
  * Test suite for the Detain\MyAdminSsl\Plugin class.
@@ -20,13 +26,34 @@ class PluginTest extends TestCase
     private ReflectionClass $reflection;
 
     /**
-     * Set up the reflection instance before each test.
+     * Fresh history spy installed on the \MyAdmin\App facade for each test.
+     *
+     * @var HistorySpy
+     */
+    private HistorySpy $history;
+
+    /**
+     * Set up the reflection instance and framework spies before each test.
      *
      * @return void
      */
     protected function setUp(): void
     {
         $this->reflection = new ReflectionClass(Plugin::class);
+        $this->resetFrameworkSpies();
+    }
+
+    /**
+     * Clears the framework spies so each recorded effect belongs to the call
+     * under test.
+     *
+     * @return void
+     */
+    private function resetFrameworkSpies(): void
+    {
+        $this->history = App::resetHistory();
+        Mail::reset();
+        DbSpy::reset();
     }
 
     // ---------------------------------------------------------------
@@ -797,14 +824,106 @@ class PluginTest extends TestCase
     }
 
     /**
-     * Verify the source file uses the history tracking system.
+     * Verify the enable closure records the activation in history.
+     *
+     * This drives the closure the plugin registers and asserts what it
+     * actually recorded. The previous version grepped src/Plugin.php for
+     * "history->add(", so it broke the moment the history call moved from
+     * $GLOBALS['tf']->history->add() to the \MyAdmin\App::history() facade,
+     * even though the behaviour was identical.
      *
      * @return void
      */
-    public function testSourceContainsHistoryTracking(): void
+    public function testEnableRecordsActivationInHistory(): void
     {
-        $source = file_get_contents($this->reflection->getFileName());
-        $this->assertStringContainsString('history->add(', $source);
+        $handler = $this->registerLifecycleCallbacks();
+        $handler->run('enable');
+
+        $this->assertCount(1, $this->history->entries, 'enable should record exactly one history entry');
+        $entry = $this->history->entries[0];
+        $this->assertSame('ssl_certs', $entry['section'], 'the entry must be filed under the ssl_certs table');
+        $this->assertSame('change_status', $entry['type']);
+        $this->assertSame('active', $entry['new'], 'enable must record the new active status');
+        $this->assertSame(4321, $entry['old'], 'the entry must reference the certificate id');
+        $this->assertSame(9876, $entry['custid'], 'the entry must be attributed to the certificate owner');
+    }
+
+    /**
+     * Verify the reactivate closure records the activation in history.
+     *
+     * @return void
+     */
+    public function testReactivateRecordsActivationInHistory(): void
+    {
+        $handler = $this->registerLifecycleCallbacks();
+        $handler->run('reactivate');
+
+        $this->assertCount(1, $this->history->entries, 'reactivate should record exactly one history entry');
+        $entry = $this->history->entries[0];
+        $this->assertSame('ssl_certs', $entry['section']);
+        $this->assertSame('change_status', $entry['type']);
+        $this->assertSame('active', $entry['new']);
+        $this->assertSame(4321, $entry['old']);
+        $this->assertSame(9876, $entry['custid']);
+    }
+
+    /**
+     * Verify the enable and reactivate closures flip the certificate row to
+     * active and notify the admins, alongside the history entry.
+     *
+     * @return void
+     */
+    public function testEnableAndReactivateActivateTheRowAndNotifyAdmins(): void
+    {
+        foreach (['enable' => 'ssl_created.tpl', 'reactivate' => 'ssl_reactivated.tpl'] as $callback => $template) {
+            $this->resetFrameworkSpies();
+            $handler = $this->registerLifecycleCallbacks();
+            $handler->run($callback);
+
+            $this->assertCount(1, DbSpy::$queries, $callback . ' should issue exactly one query');
+            $this->assertStringContainsString("update ssl_certs set ssl_status='active'", DbSpy::$queries[0]);
+            $this->assertStringContainsString("ssl_id='4321'", DbSpy::$queries[0]);
+
+            $this->assertCount(1, Mail::$sent, $callback . ' should send exactly one admin notification');
+            $this->assertSame('admin/' . $template, Mail::$sent[0]['template']);
+            $this->assertSame('rendered:email/admin/' . $template, Mail::$sent[0]['email']);
+        }
+    }
+
+    /**
+     * Verify loadProcessing wires the module name, activation statuses and
+     * lifecycle closures onto the ServiceHandler and registers it.
+     *
+     * @return void
+     */
+    public function testLoadProcessingRegistersLifecycleCallbacks(): void
+    {
+        $handler = $this->registerLifecycleCallbacks();
+
+        $this->assertSame('ssl', $handler->module);
+        $this->assertSame(['pending', 'pendapproval', 'active'], $handler->activationStatuses);
+        $this->assertTrue($handler->registered, 'loadProcessing must call register()');
+        $this->assertSame(['enable', 'reactivate', 'disable'], array_keys($handler->callbacks));
+    }
+
+    /**
+     * Runs Plugin::loadProcessing() against a ServiceHandler spy carrying a
+     * representative ssl_certs row, and returns the spy.
+     *
+     * @return ServiceHandlerSpy
+     */
+    private function registerLifecycleCallbacks(): ServiceHandlerSpy
+    {
+        $handler = new ServiceHandlerSpy();
+        $handler->setServiceInfo([
+            'ssl_id' => 4321,
+            'ssl_custid' => 9876,
+            'ssl_hostname' => 'secure.example.com',
+            'ssl_type' => 31,
+            'ssl_status' => 'pending',
+        ]);
+        Plugin::loadProcessing(new GenericEvent($handler));
+        return $handler;
     }
 
     /**
