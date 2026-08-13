@@ -1,6 +1,6 @@
 ---
 name: ssl-phpunit-test
-description: Creates a PHPUnit 9.6 test class in `tests/` for the myadmin-ssl-module. Use when user says 'add test', 'write unit test', 'test Plugin', or adds files to `tests/`. Covers class structure, static properties, hook configuration, method signatures, and source-level static analysis via ReflectionClass. Do NOT use for integration tests requiring live DB, MyAdmin framework globals, or live Symfony EventDispatcher dispatch. NOTE: for a plugin's contract/behavioral tests (tests/ContractTest.php, the shared harness, composer myadmin:scaffold-tests) use the plugin-contract-tests skill instead — this skill's reflection-only guidance predates that harness.
+description: Creates a PHPUnit 9.6 test class in `tests/` for the myadmin-ssl-module. Use when user says 'add test', 'write unit test', 'test Plugin', or adds files to `tests/`. Covers class structure, static properties, hook configuration, method signatures, and source-level static analysis via ReflectionClass. Do NOT use for integration tests requiring live DB, MyAdmin framework globals, or live Symfony EventDispatcher dispatch. For a plugin's contract or behavioral tests (tests/ContractTest.php, the shared harness, composer myadmin:scaffold-tests) use the plugin-contract-tests skill instead — this skill's reflection-only guidance predates that harness.
 ---
 <!-- myadmin-contract-harness-notice -->
 > ### ⚠️ Read this before the rest of the file
